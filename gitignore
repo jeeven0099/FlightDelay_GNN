@@ -1,0 +1,33 @@
+# Large data files — download separately or rebuild with pipeline
+graph_data/snapshots_train.pt
+graph_data/snapshots_val.pt
+graph_data/snapshots_test.pt
+graph_data/rotation_edges.parquet
+graph_data/weather_node_features.parquet
+graph_data/flights_2018_2022.parquet
+
+# Model checkpoint — download from Releases
+checkpoints/best_model.pt
+
+# Environment
+gnn_env/
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+*.err
+train_*.log
+
+# Jupyter
+.ipynb_checkpoints/
