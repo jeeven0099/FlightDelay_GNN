@@ -306,6 +306,6 @@ flight-delay-gnn/
              Individual Flight Delay Prediction},
   author = {Balasubramaniam, Jeeven},
   year   = {2026},
-  url    = {https://github.com/yourusername/flight-delay-gnn}
+  url    = {https://github.com/jeeven0099/FlightDelay_GNN}
 }
 ```
