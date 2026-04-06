@@ -295,6 +295,7 @@ flight-delay-gnn/
 **~19 min floor at 6h ahead.** ~90% of delay variance is irreducible from public data — mechanical failures, crew positioning, ATC decisions, last-minute weather. Breaking below 15 min requires private operational data.
 
 **RMSE ~57 min.** Driven by cancellations/diversions coded as extreme delays in BTS data.
+![res](https://github.com/user-attachments/assets/37cc765d-da0d-428f-a0bb-896ac9dc3b2e)
 
 ---
 
