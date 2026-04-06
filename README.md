@@ -1,8 +1,7 @@
 # Flight Delay GNN — Two-Level Heterogeneous Graph Neural Network
 
-**Predicts individual US domestic flight arrival delays up to 6 hours before departure** using a novel two-level heterogeneous graph that jointly models airport congestion networks and individual flig<img width="1877" height="870" alt="sc_1" src="https://github.com/user-attachments/assets/ffb4fff3-2071-4b90-b7cb-a5b53ce13f5a" />
-ht tail rotation chains — without requiring any real-time gate data at long horizons.
-
+**Predicts individual US domestic flight arrival delays up to 6 hours before departure** using a novel two-level heterogeneous graph that jointly models airport congestion networks and individual flight tail rotation chains — without requiring any real-time gate data at long horizons.
+<img width="1877" height="870" alt="sc_1" src="https://github.com/user-attachments/assets/ffb4fff3-2071-4b90-b7cb-a5b53ce13f5a" />
 > **Live demo:** [jeevenbalasubramaniam.github.io](https://jeevenbalasubramaniam.github.io) — Flight predictor tab
 
 ---
