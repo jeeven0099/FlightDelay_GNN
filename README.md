@@ -1,312 +1,363 @@
-# Flight Delay GNN — Two-Level Heterogeneous Graph Neural Network
+# Airline Graph Neural Network for Flight Delay Prediction
 
-**Predicts individual US domestic flight arrival delays up to 6 hours before departure** using a novel two-level heterogeneous graph that jointly models airport congestion networks and individual flight tail rotation chains — without requiring any real-time gate data at long horizons.
-<img width="1877" height="870" alt="sc_1" src="https://github.com/user-attachments/assets/ffb4fff3-2071-4b90-b7cb-a5b53ce13f5a" />
-> **Live demo:** [jeevenbalasubramaniam.github.io](https://jeevenbalasubramaniam.github.io) — Flight predictor tab
+Graph-temporal flight delay forecasting over a large U.S. airline network using heterogeneous graphs, recurrent airport/tail state, and multi-horizon evaluation.
 
----
+This repository is an end-to-end ML systems project: data validation, graph construction, temporal training, cluster evaluation, and demo-facing inference scripts. It started as an arrival-delay project and was later migrated to a departure-delay formulation for cleaner benchmarking and more realistic pre-departure use.
 
-## Results
+## What This Project Does
 
-### Honest two-number summary
+The model predicts flight delay across multiple pre-departure horizons:
 
-| Mode | MAE | What it knows |
-|------|-----|---------------|
-| **6h ahead — no gate data** | **19.6 min** | Weather, network state, tail history, route patterns, cascade |
-| **Near departure — with gate data** | **9.68 min** | All of above + actual dep delay and taxi time |
+- `0h`: `<1h before departure`
+- `1h`: `1–3h before departure`
+- `3h`: `3–6h before departure`
+- `6h`: `>6h before departure`
 
-The 6h-ahead number is the **novel result**. No published model evaluates honest individual flight prediction at 6h ahead without gate data.
+The graph combines:
 
-### Comparison with published baselines
+- airport nodes
+- flight nodes
+- airport-to-airport network edges
+- congestion edges
+- airport-to-flight assignment edges
+- flight-to-flight rotation edges
+- per-airport recurrent state
+- per-tail recurrent state
 
-| Method | Year | Horizon | MAE | Gate data? |
-|--------|------|---------|-----|-----------|
-| Dynamic RF/CatBoost | 2025 | 90 min | 8.46 min | ✅ Private airline data |
-| UC Berkeley XGBoost | 2025 | ~0h | 12.79 min | ✅ Yes |
-| Saudi Airlines CatBoost | 2024 | ~0h | 12.19 min | ✅ Yes |
-| FDPP-ML (Springer) | 2023 | 2h | 16.70 min | ❌ No |
-| **This work — with gate data** | **2026** | **1h** | **9.68 min** | **✅ Yes** |
-| **This work — no gate data** | **2026** | **6h** | **19.6 min** | **❌ No** |
+The current primary target is **departure delay**.
 
-The honest comparison is against **FDPP-ML** — same public BTS data, no gate information. This model predicts at 6h (vs FDPP-ML's 2h) with comparable accuracy.
+## Why This Is Interesting
 
-### Day simulation — 2022-11-04
+Flight delay prediction is a hard systems problem:
 
-Evaluated on 7,254 flights with GRU warmed up from the previous evening:
+- delays propagate through aircraft rotations
+- airport congestion shifts quickly
+- weather matters at both origin and destination
+- severe disruptions are rare but operationally important
+- evaluation can be misleading if the pipeline leaks future information
 
-| Metric | All flights | Operational (≤120 min actual) |
-|--------|-------------|-------------------------------|
-| MAE 6h ahead | 25.43 min | **20.3 min** |
-| MAE 3h ahead | 25.45 min | — |
-| MAE 1h ahead | 25.28 min | — |
-| RMSE | 57.1 min | — |
-| Delay classification accuracy | 73.5% | — |
+This project focuses not just on model accuracy, but on **causal-ish feature design, leakage control, and honest evaluation**.
 
-The gap between all flights and operational flights is entirely from cancellations coded as 900–1300 min in BTS data — no public signal predicts those at 6h ahead.
+## Current Status
 
-**On-time flight accuracy:** MAE ~13 min for the 5,461 on-time flights — competitive with at-gate baselines.
+The repository contains both stable results and active experiments.
 
-**Calibration:** Predicted delayed >15 min: **15.9%** vs actual **17.1%** — 1.2 pp off.
+### Current primary model
 
-**GRU accumulation confirmed:**
+The current primary checkpoint is:
 
-| Time | Avg predicted delay |
-|------|-------------------|
-| 06:00 | −3.0 min |
-| 12:00 | −0.7 min |
-| 18:00 | +2.4 min |
-| 22:00 | +10.9 min |
-| 23:00 | +12.1 min |
+- checkpoint: `best_model_dep_12k_ordinal_ep25.pt`
 
-**Airline ordering:** Frontier/Spirit predicted worst, Delta/SkyWest predicted best — matches known operational reality.
+This is the strongest corrected overall departure-delay model so far after the ordinal-tail reformulation.
 
----
+Corrected departure-delay validation performance:
 
-## What makes this different
+| Metric | Value |
+| --- | ---: |
+| Overall MAE | `13.244` min |
+| Overall RMSE | `40.485` min |
+| `0h` MAE | `12.25` |
+| `1h` MAE | `12.38` |
+| `3h` MAE | `13.49` |
+| `6h` MAE | `14.23` |
 
-### Eight novel contributions
+Corrected departure-delay test performance on the rebuilt 2022 holdout:
 
-**1. Honest horizon-aware feature masking**
-Gate features (dep_delay, taxi_out, turnaround, carrier_delay, immed_inbound) are deterministically zeroed for flights more than 2 hours from departure — during both training and inference. No published flight delay paper applies this protocol.
+| Metric | Value |
+| --- | ---: |
+| Overall MAE | `16.572` min |
+| Overall RMSE | `47.448` min |
+| `0h` MAE | `15.17` |
+| `1h` MAE | `15.42` |
+| `3h` MAE | `16.97` |
+| `6h` MAE | `17.83` |
 
-**2. Two-level heterogeneous graph**
-Airport nodes and individual flight nodes coexist in a unified graph. Most GNN papers model airports only. Each flight has its own node with tail history, route statistics, and causal inbound signal.
+Severe-delay detection using a simple `pred >= 120` rule:
 
-**3. Causal rotation edges — fired only on observed arrivals**
-A self-edge on each downstream flight fires only when the upstream aircraft has actually landed — carrying the observed arrival delay as edge attribute. No edge fires when leg1 is still airborne, eliminating gradient noise from unobserved signals. Cascade delay at 6h ahead is carried through cumul_delay node features (always available).
+- all bands precision: `0.611`
+- all bands recall: `0.370`
+- 6h precision: `0.543`
+- 6h recall: `0.299`
 
-**4. GRU temporal memory per airport**
-Each of the 36 airports maintains a 256-dimensional hidden state across the day. Validated: −3.0 min at 6am → +12.1 min at 11pm, matching real-world cascade patterns.
+The ordinal classifier head is more conservative than the regression threshold:
 
-**5. Dynamic congestion edge weights**
-Weights computed per snapshot from actual taxi-out anomalies (z-score vs airport baseline), not static 5-year averages.
+- classifier all-bands precision: `0.673`
+- classifier all-bands recall: `0.163`
+- classifier 6h precision: `0.622`
+- classifier 6h recall: `0.147`
 
-**6. Per-date actual weather features**
-Airport dynamic features use actual hourly METAR observations keyed by (date, hour, airport) — not 5-year climatological averages.
+### Strong baseline
 
-**7. Historical route statistics — training years only**
-hist_route_delay_avg and hist_route_delay_std per route × hour × day-of-week from 2018–2020 only. No leakage. Available at all horizons.
+The simpler departure-delay baseline remains an important comparison point:
 
-**8. Joint regression + classification**
-Classification head predicts P(ArrDelay > 15 min) jointly with regression, improving calibration around the DOT delay threshold.
+- checkpoint: `best_model_before_severe_patch.pt`
 
----
+Corrected departure-delay test performance:
 
-## Architecture
+| Metric | Value |
+| --- | ---: |
+| Overall MAE | `16.656` min |
+| Overall RMSE | `49.040` min |
+| `0h` MAE | `15.46` |
+| `1h` MAE | `15.64` |
+| `3h` MAE | `17.00` |
+| `6h` MAE | `17.76` |
 
-### Graph structure (one hourly snapshot)
+This baseline is slightly simpler and still competitive, but the ordinal checkpoint edges it out overall and gives much better tail interpretability.
 
-```
-Two node types:
-  airport (36 nodes)         — 30 features, persistent GRU state
-  flight  (~2,272/snapshot)  — 19 features, causal masking at >2h
+### Active experiments
 
-Six edge types:
-  (airport, rotation,     airport)  dynamic      — tail delay at turnaround hour
-  (airport, congestion,   airport)  dynamic      — taxi z-score per snapshot
-  (airport, network,      airport)  static       — 5yr correlation-weighted mesh
-  (flight,  rotation,     flight)   causal       — fires only when leg1 has landed
-  (flight,  departs_from, airport)  unconditional — every flight to origin
-  (flight,  arrives_at,   airport)  causal       — immed_inbound > 15 min only
-```
+Recent and ongoing experiments include:
 
-**Verified edge counts (avg per snapshot):**
+- coarse severe-tail model (`best_model_dep_12k_severe_ep6.pt`)
+  - useful for understanding recall / calibration tradeoffs
+  - not better than the base or ordinal model overall
+- signed-`log1p` regression target
+  - improved stability but became too conservative in the tail
+  - not adopted as the main checkpoint
+- tail uplift head for `>=240` and `>=720`
+  - current active experiment
+  - intended to improve extreme-tail minute prediction without sacrificing overall calibration
 
-| Edge type | Avg/snapshot |
-|-----------|-------------|
-| departs_from | 2,272 |
-| arrives_at | 183 |
-| flight rotation | 99 |
-| congestion (dynamic) | 5,074 |
-| network (static) | 1,260 |
+### Important evaluation note
 
-### Airport node features (30 dims)
+The 2022 test split is relatively sparse compared with train/val and behaves partly like an out-of-distribution stress test. Earlier test runs in this repo were invalid until `snapshots_test.pt` was refreshed after the departure-delay migration. The numbers above are from the corrected test setup.
 
-| Group | Dims | Description |
-|-------|------|-------------|
-| Static | 5 | is_hub, hist avg dep/arr delay, hist avg taxi, total departures |
-| Current dynamic | 9 | avg dep/arr delay, taxi times, counts, wind, visibility, precip (per-date actual) |
-| Traffic load | 6 | scheduled dep/arr next 1h, 3h, 6h |
-| Forecast weather | 6 | avg wind/precip/visibility at +3h and +6h |
-| Time embeddings | 4 | hour sin/cos, month sin/cos |
+## Repository Layout
 
-### Flight node features (19 dims)
+### Core training pipeline
 
-| Group | Dims | Description |
-|-------|------|-------------|
-| Gate state | 5 | dep_delay, taxi_out, turnaround, carrier_delay, immed_inbound *(zeroed >2h out)* |
-| Tail history | 3 | tail_cumul_delay, tail_legs_today, is_first_flight |
-| Schedule | 6 | dep/arr hour sin/cos, day_of_week sin/cos |
-| Context | 3 | distance, is_hub_origin, time_to_dep |
-| Route stats | 2 | hist_route_avg, hist_route_std *(never masked)* |
+- [00_validate_dataset.py](00_validate_dataset.py): basic dataset validation and sanity checks
+- [02_build_rotation_edges.py](02_build_rotation_edges.py): build aircraft rotation edges
+- [03_build_weather_edge.py](03_build_weather_edge.py): weather feature/edge construction
+- [04_build_congestion_edges.py](04_build_congestion_edges.py): congestion edge construction
+- [05_build_graph_snapshots.py](05_build_graph_snapshots.py): build graph snapshots and labels
+- [06_train_gnn.py](06_train_gnn.py): train the graph-temporal GNN
+- [07_dashboard.py](07_dashboard.py): offline evaluation and model comparison
 
-### Model
+### Demo / inference scripts
 
-```
-Input projection  (30d airport / 19d flight → 256d hidden)
-      ↓
-HGTConv × 2  (4 attention heads, residual + LayerNorm)
-      ↓
-GRUCell per airport  (256d, persistent across snapshots)
-      ↓
-Gated MLP per flight  (128d)
-      ↓
-Regression head  → predicted ArrDelay (minutes)
-Classifier head  → P(ArrDelay > 15 min)
-```
+- [08_realtime_connector.py](08_realtime_connector.py): live API connector for real-time data refresh
+- [09_day_simulation.py](09_day_simulation.py): track predictions for flights across a day
+- [10_flight_finder.py](10_flight_finder.py): lightweight web app for on-demand predictions
 
-**Parameters:** ~2,005,175 | **Hardware:** Rice University NOTS — Tesla V100-PCIE-32GB
+### Data / outputs
 
-### Loss
+- [`graph_data/`](graph_data): built graph artifacts, lookups, static edges, snapshot tensors
+- [`checkpoints/`](checkpoints): saved model checkpoints
+- [`evaluation/`](evaluation): evaluation CSVs and comparison tables
+- [`outputs/`](outputs): simulation and demo outputs
+- [`data/`](data): data cleaning, retrieval, and audit utilities
 
-```
-Total = airport×0.25 + flight×0.75 + classification×0.20
-Flight = Huber(δ=20) + delay weighting (1.5× for ≥60 min actual)
-       + horizon weights: 1h×0.20 · 3h×0.35 · 6h×0.45
-```
+## Data
 
----
+The project uses a large U.S. flight dataset from 2018–2022 plus airport weather data and graph-derived operational features.
 
-## Training
+Main flight parquet:
 
-| Setting | Value |
-|---------|-------|
-| Features | 30 airport / 19 flight |
-| Hidden / GRU / MLP | 256 / 256 / 128 |
-| HGT heads / layers | 4 / 2 |
-| Parameters | ~2,005,175 |
-| Batch size | 16 consecutive snapshots |
-| LR schedule | 1e-3 → 5e-4 → 2.5e-4 (ReduceLROnPlateau, patience=4) |
-| Best epoch | 23 |
-| Train / Val / Test | 2018–2020 / 2021 / 2022 |
-| Dataset | 9,179,915 flights · 36 hub airports · 43,177 hourly snapshots |
-| Rotation pairs | 17,850,533 |
+- [`flights_2018_2022.parquet`](flights_2018_2022.parquet)
 
----
+Graph data artifacts generated by step 5 include:
 
-## Data sources
+- [`graph_data/snapshots_train.pt`](graph_data/snapshots_train.pt)
+- [`graph_data/snapshots_val.pt`](graph_data/snapshots_val.pt)
+- [`graph_data/snapshots_test.pt`](graph_data/snapshots_test.pt)
+- [`graph_data/static_edges.pt`](graph_data/static_edges.pt)
+- [`graph_data/flight_lookup.parquet`](graph_data/flight_lookup.parquet)
+- [`graph_data/tail2idx.json`](graph_data/tail2idx.json)
 
-| Source | Used for |
-|--------|---------|
-| BTS On-Time Performance (2018–2022) | Training, validation, test |
-| NWS METAR | Per-date hourly weather features |
-| AviationStack API | Live flight schedules + tail numbers |
-| NWS Weather API | Current + 6h forecast |
-| FAA NASSTATUS | Ground delay programs |
+## Model Summary
 
-Key stats: mean ArrDelay +3.0 min · std 48.3 min · 17.1% flights delayed >15 min
+The main model in [06_train_gnn.py](06_train_gnn.py) is a heterogeneous graph neural network with recurrent state:
 
----
+- HGT-style message passing over airport/flight nodes
+- airport GRU to maintain temporal airport state
+- per-tail GRUCell to model aircraft state propagation
+- dynamic rotation gate
+- multi-horizon supervision
 
-## Web apps
+Current default hidden sizes:
 
-### Production flight finder (step 10)
+- hidden dim: `512`
+- heads: `8`
+- GNN layers: `2`
+- airport GRU: `2 x 512`
+- tail hidden dim: `128`
+
+## Feature Design
+
+Examples of signals used:
+
+- route-history priors
+- airport dynamic delay / taxi aggregates
+- scheduled traffic load
+- forecast weather
+- inbound tail state
+- actual previous-leg arrival delay, but only after the previous leg has landed
+- aircraft rotation structure
+
+Examples of signals intentionally removed or zeroed to avoid direct leakage for departure prediction:
+
+- current flight realized `DepDelay`
+- current flight realized `TaxiOut`
+- current flight `CarrierDelay`
+
+## Leakage / Causality Notes
+
+This project has gone through multiple leakage audits and bug fixes.
+
+### Fixed
+
+- removed direct current-flight departure-delay leakage
+- removed direct current-flight taxi-out leakage
+- fixed a rotation self-loop bug by building true `leg1 -> leg2` flight rotation edges
+- corrected stale test snapshots after the departure-delay migration
+
+### Still important to know
+
+The project still uses **same-hour airport dynamic aggregates** (average departure delay, taxi, etc.). These are operationally plausible in a near-real-time system, but they are somewhat optimistic for strict benchmark-style forecasting because they may include information from later in the same hour.
+
+So this repo is designed to be **causal-aware and much cleaner than a naive pipeline**, but not a final publication-grade benchmark yet.
+
+## Key Experiments So Far
+
+### 1. Arrival-delay baseline
+
+Earlier versions predicted arrival delay and achieved decent holdout performance, but the target was harder to compare to public departure-delay baselines.
+
+### 2. Departure-delay migration
+
+The full pipeline was migrated from arrival delay to departure delay:
+
+- route priors switched to `DepDelay`
+- airport labels switched to departure-delay averages
+- flight labels switched to `DepDelay`
+- direct leakage features removed
+
+### 3. Severe-tail experiments
+
+The project explored models focused on rare extreme delays:
+
+- coarse `>=120 min` severe classifier
+- severity-aware window sampling
+- ordinal-tail reformulation with thresholds:
+  - `>=0`
+  - `>=15`
+  - `>=60`
+  - `>=120`
+  - `>=240`
+  - `>=720`
+- signed-`log1p` regression target
+- tail uplift head for:
+  - `>=240`
+  - `>=720`
+
+The strongest result from this line so far is the ordinal checkpoint `best_model_dep_12k_ordinal_ep25.pt`. Tail-specific refinement beyond that is still active work.
+
+## Running the Pipeline
+
+### 1. Validate / inspect data
+
 ```bash
-python 10_flight_finder.py   # http://127.0.0.1:8051
-```
-3 API calls per request. Returns 6h/3h/1h predictions with weather context.
-
-### Live real-time dashboard (step 8 + step 7)
-```bash
-python 08_realtime_connector.py --mode test   # test API connections first
-python 08_realtime_connector.py               # fetch live data
-python 07_dashboard.py --mode realtime        # launch dashboard
-```
-Requires `AVIATIONSTACK_KEY` in `.env`. Refreshes every 3 hours.
-
-### Historical dashboard (step 7)
-```bash
-python 07_dashboard.py --mode dash --date 2022-11-04
+python 00_validate_dataset.py
 ```
 
----
-
-## Setup
+### 2. Build graph components
 
 ```bash
-git clone https://github.com/yourusername/flight-delay-gnn
-cd flight-delay-gnn
-python -m venv gnn_env
-source gnn_env/bin/activate        # Mac/Linux
-# gnn_env\Scripts\activate         # Windows
-
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-pip install torch-geometric pandas numpy pyarrow tqdm dash plotly requests python-dotenv
+python 02_build_rotation_edges.py
+python 03_build_weather_edge.py
+python 04_build_congestion_edges.py
+python 05_build_graph_snapshots.py
 ```
 
-Create `.env`:
-```
-AVIATIONSTACK_KEY=your_key_here
-```
-
----
-
-## Pipeline
+### 3. Train
 
 ```bash
-python 02_build_rotation_edges.py   # 17.85M tail rotation pairs (~20 min)
-python 03_build_weather_edges.py    # METAR weather enrichment
-python 04_build_congestion_edges.py # dynamic congestion topology
-python 05_build_graph_snapshots.py  # 43,177 snapshots (~45 min)
-python 06_train_gnn.py              # train (~10h on V100)
-python 10_flight_finder.py          # production app
-python 09_day_simulation.py --date 2022-11-04 --save_plots
+python 06_train_gnn.py
 ```
 
----
+### 4. Evaluate
 
-## File structure
-
-```
-flight-delay-gnn/
-├── 02_build_rotation_edges.py     17.85M tail rotation pairs
-├── 03_build_weather_edges.py      METAR weather enrichment
-├── 04_build_congestion_edges.py   dynamic congestion topology
-├── 05_build_graph_snapshots.py    43,177 hourly graph snapshots
-├── 06_train_gnn.py                HGT + GRU training, per-horizon MAE logging
-├── 07_dashboard.py                historical + live dashboard
-├── 08_realtime_connector.py       live API connector (NWS, FAA, AviationStack)
-├── 09_day_simulation.py           full-day evaluation with GRU warmup
-├── 10_flight_finder.py            on-demand flight finder (3 API calls)
-├── graph_data/
-│   ├── snapshots_train.pt         7.0 GB  — not in git (see .gitignore)
-│   ├── snapshots_val.pt           2.3 GB  — not in git
-│   ├── snapshots_test.pt          0.2 GB  — not in git
-│   ├── static_edges.pt
-│   ├── flight_lookup.parquet
-│   ├── route_stats.parquet        route × hour × dow (training only)
-│   ├── rotation_edges.parquet     — not in git (large)
-│   ├── congestion_edges.parquet
-│   ├── network_edges.parquet
-│   └── airport_index.parquet
-└── checkpoints/
-    ├── best_model.pt              epoch 23, val MAE 19.579 min
-    └── training_history.csv       per-epoch 1h/3h/6h MAE breakdown
+```bash
+python 07_dashboard.py --checkpoint best_model.pt --split val
+python 07_dashboard.py --checkpoint best_model.pt --split test
 ```
 
----
+## Running on Rice / Slurm
 
-## Known limitations
+This project was trained and evaluated on Rice NOTS using Slurm.
 
-**36 hub airports only.** Smaller regional airports not modelled.
+Typical pattern:
 
-**Cancellations not predicted.** No public signal distinguishes a cancellation from a normal flight 6 hours ahead. This is the primary driver of RMSE.
+1. build snapshots locally or on cluster
+2. copy `graph_data/` artifacts if needed
+3. upload updated scripts
+4. train with `sbatch`
+5. evaluate with `sbatch`
 
-**~19 min floor at 6h ahead.** ~90% of delay variance is irreducible from public data — mechanical failures, crew positioning, ATC decisions, last-minute weather. Breaking below 15 min requires private operational data.
+The current scripts support overriding the project root with:
 
-**RMSE ~57 min.** Driven by cancellations/diversions coded as extreme delays in BTS data.
-![res](https://github.com/user-attachments/assets/37cc765d-da0d-428f-a0bb-896ac9dc3b2e)
-
----
-
-## Citation
-
-```bibtex
-@misc{balasubramaniam2026flightgnn,
-  title  = {Two-Level Heterogeneous GNN for Honest Multi-Horizon
-             Individual Flight Delay Prediction},
-  author = {Balasubramaniam, Jeeven},
-  year   = {2026},
-  url    = {https://github.com/jeeven0099/FlightDelay_GNN}
-}
+```bash
+python 07_dashboard.py --checkpoint best_model.pt --split test --drive_base /scratch/jb310/airline_project
 ```
+
+## Dependencies
+
+There is no final pinned `requirements.txt` yet, but the core stack is:
+
+- Python `3.11+`
+- `torch`
+- `torch-geometric`
+- `numpy`
+- `pandas`
+- `pyarrow`
+- `requests`
+- `python-dotenv`
+- `dash`
+- `plotly`
+- `dash-bootstrap-components`
+
+Example:
+
+```bash
+pip install torch torch-geometric numpy pandas pyarrow requests python-dotenv dash plotly dash-bootstrap-components
+```
+
+## Notable Findings
+
+- A graph-temporal model can learn useful multi-horizon delay structure over a large airline network.
+- Contiguous training windows improve temporal realism, but broader regime coverage is still important for robustness.
+- A model can look excellent on validation while still failing under a shifted holdout regime.
+- Severe-delay detection benefits from explicit tail-aware objectives, but overly coarse severe buckets can hurt calibration.
+- The ordinal-tail reformulation improved overall corrected test performance while giving a more interpretable breakdown of `120-240`, `240-720`, and `720+` disruption tiers.
+- Simply compressing the regression target with `log1p` was not enough to fix the far tail by itself.
+- Honest evaluation and pipeline debugging mattered as much as the raw architecture.
+
+## Limitations
+
+- same-hour airport aggregates are still somewhat optimistic for strict benchmarking
+- no final public benchmark protocol yet matching an exact `2h before departure, one prediction per flight` paper-style setup
+- severe/extreme tail minute prediction is still under active iteration, especially for the `720+` terminal tier
+- demo scripts ([09_day_simulation.py](09_day_simulation.py), [10_flight_finder.py](10_flight_finder.py)) were originally written around earlier arrival-delay checkpoints and may need light refresh depending on which checkpoint you want to showcase
+
+## Next Steps
+
+- evaluate the tail-uplift architecture against the ordinal baseline
+- strengthen minute prediction for `240-720` and especially `720+`
+- keep the ordinal tier outputs as the main risk signal for demos
+- evaluate exact-horizon per-flight benchmarks
+- tighten same-hour feature realism
+- refresh demo-facing scripts around the final departure-delay checkpoint
+
+## Why This Repo Exists
+
+This project is meant to show:
+
+- graph ML engineering
+- large-scale temporal data handling
+- debugging under real-world data messiness
+- model evaluation discipline
+- practical deployment thinking
+
+It is both a forecasting project and a systems/debugging project.
