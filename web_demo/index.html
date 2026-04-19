@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jeeven Balasubramaniam | Portfolio</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body>
+  <div class="page-shell">
+    <nav class="site-nav">
+      <div class="brand-block">
+        <div class="brand-name">Jeeven Balasubramaniam</div>
+        <div class="brand-subtitle">ML systems, edge AI, and graph learning</div>
+      </div>
+      <div class="tab-row">
+        <button class="nav-tab active" data-tab="home">Profile</button>
+        <button class="nav-tab" data-tab="flight-demo">Flight Delay Demo</button>
+        <button class="nav-tab" data-tab="wearable">Wearable Device</button>
+        <button class="nav-tab" data-tab="cgcnn">CGCNN Research</button>
+      </div>
+    </nav>
+
+    <section class="tab-panel active" data-panel="home">
+      <header class="hero home-hero">
+        <div>
+          <p class="eyebrow">About Me</p>
+          <h1>Building applied ML systems that survive real-world constraints.</h1>
+          <p class="hero-copy">
+            I am a Master's in Data Science student at Rice University with experience spanning graph neural
+            networks, hardware validation, edge AI, and full-stack ML deployment. My work focuses on turning
+            research ideas into usable systems: clean pipelines, honest evaluation, product-minded demos, and
+            deployment paths that hold up outside a notebook.
+          </p>
+          <div class="hero-actions">
+            <a class="primary-btn anchor-btn" href="mailto:jb310@rice.edu">jb310@rice.edu</a>
+            <a class="ghost-btn anchor-btn" href="https://www.linkedin.com/in/jeeven-balasubramaniam-55304a1b0/" target="_blank" rel="noreferrer">LinkedIn</a>
+          </div>
+        </div>
+        <div class="hero-badge profile-badge">
+          <div class="badge-line"><strong>Rice University</strong></div>
+          <div class="badge-line">Master of Data Science</div>
+          <div class="badge-line">GPA 3.8</div>
+          <div class="badge-divider"></div>
+          <div class="badge-line"><strong>Previous:</strong> Intel Corporation</div>
+          <div class="badge-line">Product Development Engineer</div>
+        </div>
+      </header>
+
+      <section class="metrics-grid home-stats">
+        <article class="metric-card">
+          <span class="metric-label">Current Role</span>
+          <strong class="metric-value home-value">Teaching Assistant</strong>
+          <span class="home-metric-sub">Systems Design, Rice University</span>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Industry Experience</span>
+          <strong class="metric-value home-value">Intel</strong>
+          <span class="home-metric-sub">Product development and data engineering</span>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Focus Areas</span>
+          <strong class="metric-value home-value">Graph ML</strong>
+          <span class="home-metric-sub">Edge AI, deployment, and data systems</span>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Core Stack</span>
+          <strong class="metric-value home-value">Python</strong>
+          <span class="home-metric-sub">PyTorch, FastAPI, SQL, Linux, CI/CD</span>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Experience</p>
+              <h2>Work and Teaching</h2>
+            </div>
+          </div>
+          <div class="stack-list">
+            <div class="resume-card">
+              <div class="resume-head">
+                <div>
+                  <h3>Teaching Assistant, COMP 413 Systems Design</h3>
+                  <p>Rice University | Jan 2026 - Present</p>
+                </div>
+              </div>
+              <ul class="bullet-list">
+                <li>Mentor undergraduate teams building end-to-end software systems across backend architecture, frontend interfaces, ML integration, and security.</li>
+                <li>Guide startup-style product development cycles with technical scoping, tradeoff analysis, and design review feedback.</li>
+                <li>Coach students on API design, cloud deployment, database schema planning, and model integration pipelines.</li>
+              </ul>
+            </div>
+
+            <div class="resume-card">
+              <div class="resume-head">
+                <div>
+                  <h3>Product Development Engineer</h3>
+                  <p>Intel Corporation | Mar 2023 - Jul 2025</p>
+                </div>
+              </div>
+              <ul class="bullet-list">
+                <li>Built automated validation and fault-detection workflows for Granite Rapids-D server processors across multiple DFT methodologies.</li>
+                <li>Analyzed large-scale scan-chain and silicon telemetry datasets to diagnose coverage gaps and improve reliability before production release.</li>
+                <li>Debugged hardware-software validation failures and created Python/Perl automation to reduce turnaround time across silicon cycles.</li>
+              </ul>
+            </div>
+
+            <div class="resume-card">
+              <div class="resume-head">
+                <div>
+                  <h3>Data Engineer Intern</h3>
+                  <p>Intel Corporation | Aug 2022 - Feb 2023</p>
+                </div>
+              </div>
+              <ul class="bullet-list">
+                <li>Designed SQL ETL pipelines to consolidate high-volume production data into analytics-ready datasets.</li>
+                <li>Automated reporting and Power BI workflows to eliminate manual weekly reporting overhead.</li>
+                <li>Optimized queries and data transformations for better execution efficiency and schema consistency.</li>
+              </ul>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Education & Skills</p>
+              <h2>Background</h2>
+            </div>
+          </div>
+          <div class="stack-list">
+            <div class="resume-card compact-card">
+              <h3>Education</h3>
+              <ul class="bullet-list">
+                <li><strong>Rice University</strong> — Master of Data Science, GPA 3.8</li>
+                <li><strong>University of Malaya</strong> — Bachelor of Computer Science, GPA 3.63</li>
+              </ul>
+            </div>
+            <div class="resume-card compact-card">
+              <h3>Technical Skills</h3>
+              <ul class="bullet-list">
+                <li>Python, SQL, Java, Perl, C++</li>
+                <li>PyTorch, TensorFlow, Scikit-learn, OpenCV, NumPy, Pandas, SciPy, Transformers, FastAPI</li>
+                <li>Linux, Git, CI/CD, REST APIs, multithreading, performance optimization, debugging</li>
+                <li>ESP32, Raspberry Pi, edge-to-cloud architectures, GitHub Actions, Power BI, Azure (AZ900)</li>
+              </ul>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Featured Projects</p>
+            <h2>Selected Work</h2>
+          </div>
+        </div>
+        <div class="project-grid">
+          <article class="project-card">
+            <h3>Flight Delay Prediction with Heterogeneous GNNs</h3>
+            <p>Graph-temporal disruption forecasting over U.S. domestic flights with multi-horizon supervision, ordinal severity tiers, leakage-aware evaluation, and a replay-first demo layer.</p>
+            <button class="text-link" data-jump-tab="flight-demo">Open flight demo</button>
+          </article>
+          <article class="project-card">
+            <h3>Dementia Patient Monitoring System</h3>
+            <p>Edge AI pipeline across an ESP32 wearable and Raspberry Pi for audio capture, speech transcription, summarization, and caregiver-facing danger detection.</p>
+            <button class="text-link" data-jump-tab="wearable">View placeholder</button>
+          </article>
+          <article class="project-card">
+            <h3>Self-Learning Framework for High-Stakes Pattern Discovery</h3>
+            <p>Self-supervised visual learning work that improved over a standard U-Net encoder, highlighting the value of learned pretext tasks over raw architectural depth.</p>
+            <button class="text-link" data-jump-tab="cgcnn">View placeholder</button>
+          </article>
+        </div>
+      </section>
+    </section>
+
+    <section class="tab-panel" data-panel="flight-demo">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Static Web Demo</p>
+          <h1>Flight Delay Replay</h1>
+          <p class="hero-copy">
+            A free-hostable replay of one validation day from the final ordinal departure-delay model.
+            This demo uses precomputed data, so it runs entirely as a static website with no live backend cost.
+          </p>
+        </div>
+        <div class="hero-badge" id="dataset-meta">Loading dataset...</div>
+      </header>
+
+      <section class="controls-card">
+        <div class="timeline-row">
+          <button id="play-toggle" class="primary-btn">Play</button>
+          <button id="step-back" class="ghost-btn">-15 min</button>
+          <button id="step-forward" class="ghost-btn">+15 min</button>
+          <input id="timeline-slider" class="timeline-slider" type="range" min="0" value="0">
+          <div class="timeline-labels">
+            <div id="snapshot-label">--</div>
+            <div id="snapshot-subtitle">Waiting for data...</div>
+          </div>
+        </div>
+
+        <div class="filter-grid">
+          <label>
+            Map View
+            <select id="map-mode">
+              <option value="severity">Predicted Severity</option>
+              <option value="correctness">Tier Correctness</option>
+              <option value="alerts">Severe Alert Result</option>
+            </select>
+          </label>
+          <label>
+            Horizon
+            <select id="horizon-filter">
+              <option value="all">All horizons</option>
+              <option value="6">&gt;6h</option>
+              <option value="3">3-6h</option>
+              <option value="1">1-3h</option>
+              <option value="0">&lt;1h</option>
+            </select>
+          </label>
+          <label>
+            Severity Filter
+            <select id="severity-filter">
+              <option value="all">All tiers</option>
+              <option value="heavy_plus">Heavy and above</option>
+              <option value="severe_plus">Severe and above</option>
+              <option value="extreme_plus">Extreme and above</option>
+              <option value="ultra_only">Ultra only</option>
+            </select>
+          </label>
+          <label>
+            Sort Table By
+            <select id="sort-order">
+              <option value="severity_desc">Severity (highest first)</option>
+              <option value="severe_prob_desc">Severe prob</option>
+              <option value="abs_err_desc">Absolute error</option>
+              <option value="actual_desc">Actual delay</option>
+              <option value="route_az">Route A-Z</option>
+              <option value="airline_az">Airline A-Z</option>
+            </select>
+          </label>
+          <label>
+            Search
+            <input id="search-box" type="text" placeholder="Route, airline, tail, flight ID">
+          </label>
+          <label>
+            Rows per page
+            <select id="page-size">
+              <option value="15">15</option>
+              <option value="25" selected>25</option>
+              <option value="50">50</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="metrics-grid">
+        <article class="metric-card">
+          <span class="metric-label">Flights In View</span>
+          <strong class="metric-value" id="metric-flights">--</strong>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">High-Confidence Severe Alerts</span>
+          <strong class="metric-value" id="metric-alerts">--</strong>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Exact Tier Match Rate</span>
+          <strong class="metric-value" id="metric-match">--</strong>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Mean Absolute Error</span>
+          <strong class="metric-value" id="metric-mae">--</strong>
+        </article>
+        <article class="metric-card">
+          <span class="metric-label">Max Severe Probability</span>
+          <strong class="metric-value" id="metric-prob">--</strong>
+        </article>
+      </section>
+
+      <section class="main-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>US Map Replay</h2>
+              <p id="map-caption">Coloring flights by predicted severity.</p>
+            </div>
+            <div class="legend-row" id="legend-row"></div>
+          </div>
+          <div id="map-plot" class="map-plot"></div>
+        </article>
+
+        <aside class="panel detail-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Selected Flight</h2>
+              <p>Click a row below to pin a route on the map.</p>
+            </div>
+          </div>
+          <div id="selection-empty" class="empty-state">
+            No flight selected yet. Pick a row from the table to inspect its route, tier, and error.
+          </div>
+          <div id="selection-card" class="selection-card hidden"></div>
+        </aside>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head table-head">
+          <div>
+            <h2>Flight Table</h2>
+            <p>Precomputed replay rows for the active snapshot and filters.</p>
+          </div>
+          <div class="pager">
+            <button id="page-prev" class="ghost-btn">Prev</button>
+            <span id="page-label">Page 1</span>
+            <button id="page-next" class="ghost-btn">Next</button>
+          </div>
+        </div>
+        <div class="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Flight ID</th>
+                <th>Airline</th>
+                <th>Tail</th>
+                <th>Route</th>
+                <th>Horizon</th>
+                <th>Dep</th>
+                <th>Arr</th>
+                <th>Pred</th>
+                <th>Pred Tier</th>
+                <th>Severe Prob</th>
+                <th>Alert</th>
+                <th>Actual</th>
+                <th>Actual Tier</th>
+                <th>Abs Err</th>
+                <th>Correct?</th>
+                <th>Alert Result</th>
+              </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <section class="tab-panel" data-panel="wearable">
+      <header class="hero placeholder-hero">
+        <div>
+          <p class="eyebrow">Project Placeholder</p>
+          <h1>Dementia Patient Monitoring System</h1>
+          <p class="hero-copy">
+            This section will become the full write-up for my wearable-device and edge-AI project:
+            ESP32 audio capture, Raspberry Pi inference, on-device speech-to-text evaluation, Flask APIs,
+            PostgreSQL storage, and caregiver-facing danger detection.
+          </p>
+        </div>
+        <div class="hero-badge placeholder-badge">
+          <div class="badge-line"><strong>Status</strong></div>
+          <div class="badge-line">Placeholder page</div>
+          <div class="badge-divider"></div>
+          <div class="badge-line">Planned content:</div>
+          <div class="badge-line">architecture, hardware stack, screenshots, latency results</div>
+        </div>
+      </header>
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Coming Soon</h2>
+            <p>Recommended next additions for this section.</p>
+          </div>
+        </div>
+        <div class="project-grid">
+          <article class="project-card">
+            <h3>System Overview</h3>
+            <p>Explain the ESP32 wearable, Raspberry Pi edge node, transcription layer, safety logic, and caregiver notification path.</p>
+          </article>
+          <article class="project-card">
+            <h3>Model Choices</h3>
+            <p>Compare the six speech-to-text models you evaluated on ARM hardware and why Moonshine base won on the latency/accuracy tradeoff.</p>
+          </article>
+          <article class="project-card">
+            <h3>Demo Material</h3>
+            <p>Add deployment screenshots, hardware photos, a sample transcript flow, and one short video clip of the end-to-end system.</p>
+          </article>
+        </div>
+      </section>
+    </section>
+
+    <section class="tab-panel" data-panel="cgcnn">
+      <header class="hero placeholder-hero">
+        <div>
+          <p class="eyebrow">Project Placeholder</p>
+          <h1>CGCNN Research / Self-Learning Framework</h1>
+          <p class="hero-copy">
+            This section is reserved for the project where I built a self-supervised learning pipeline for high-stakes pattern discovery,
+            improved spatial feature extraction, and demonstrated gains over a standard U-Net encoder.
+          </p>
+        </div>
+        <div class="hero-badge placeholder-badge">
+          <div class="badge-line"><strong>Status</strong></div>
+          <div class="badge-line">Placeholder page</div>
+          <div class="badge-divider"></div>
+          <div class="badge-line">Planned content:</div>
+          <div class="badge-line">problem framing, pretext tasks, experiments, figures, lessons learned</div>
+        </div>
+      </header>
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Coming Soon</h2>
+            <p>Suggested structure for the research write-up.</p>
+          </div>
+        </div>
+        <div class="project-grid">
+          <article class="project-card">
+            <h3>Research Story</h3>
+            <p>Describe the problem domain, the data challenge, and why self-supervision mattered more than simply making the encoder deeper.</p>
+          </article>
+          <article class="project-card">
+            <h3>Method</h3>
+            <p>Walk through the dilated-convolution feature extractor, EM-style loop, and the reasoning behind the representation-learning setup.</p>
+          </article>
+          <article class="project-card">
+            <h3>Results</h3>
+            <p>Show the +9.3% improvement over the U-Net baseline, key visualizations, and a discussion of what drove the gain.</p>
+          </article>
+        </div>
+      </section>
+    </section>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>

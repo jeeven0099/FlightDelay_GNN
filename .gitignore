@@ -1,0 +1,42 @@
+# Secrets and local config
+.env
+.env.*
+!.env.example
+
+# Python cache / env
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+
+# Mobile / Flutter local state
+.dart_tool/
+build/
+ios/Pods/
+ios/.symlinks/
+
+# Generated outputs
+outputs/
+evaluation/demo_cache/
+evaluation/__pycache__/
+evaluation/severe_reranker_*.pkl
+evaluation/severe_reranker_*_scores.csv
+evaluation/severe_reranker_*_sweep.csv
+
+# Large local datasets and model artifacts
+flights_2018_2022.parquet
+data/datasets/
+graph_data/flights_2018_2022.parquet
+graph_data/flight_lookup.parquet
+graph_data/snapshots_*.pt
+graph_data/weather_edges.parquet
+graph_data/weather_node_features.parquet
+checkpoints/*.pt
+history_models/
